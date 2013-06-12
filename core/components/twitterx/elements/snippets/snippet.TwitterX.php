@@ -118,7 +118,7 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 
 				// Request statuses with optinal parameters
 				$options = array(
-					'count' => $limit+1,
+					'count' => $limit,
 					'include_rts' => $include_rts
 				);
 
