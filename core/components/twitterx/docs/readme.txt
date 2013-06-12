@@ -1,4 +1,4 @@
-TwitterX v1.0
+TwitterX v1.1
 ==============
 
 This uses twitteroauth: https://github.com/abraham/twitteroauth
@@ -39,7 +39,7 @@ chunk - which chunk to load when rendering the statuses (default: TwitterXTpl)
 cache - how many seconds to cache the twitter data feed (default: 7200)
 screen_name - which user you want to load
 include_rts - should this include retweets (default: 1)
-cache_id - unique ID for caching in case you want to view multiple feeds or different feeds (default: TwitterX)
+cache_id - unique ID for caching in case you want to view multiple feeds or different feeds (default: TwitterX_PAGEID)
 toPlaceholder - a placeholder ID if you want to use content as a placeholder instead of outputting directly (default: '')
 
 

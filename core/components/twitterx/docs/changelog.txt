@@ -1,5 +1,10 @@
 Changelog for TwitterX package. 
 
+TwitterX 1.1 - 12/06/2013
+===================================== 
+- Fixed problem where it was ACTUALLY using 1.0 API instead of 1.1
+- Changed cached_id to not automatically append _PAGEID
+
 TwitterX 1.0 - 23/04/2013
 ===================================== 
 - Added multiple screen_name option separated by comma, thanks @hvoort

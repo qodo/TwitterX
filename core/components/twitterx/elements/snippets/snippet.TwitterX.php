@@ -18,7 +18,7 @@
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  
  * @author Stewart Orr @ Qodo Ltd <stewart@qodo.co.uk>
- * @version 1.0
+ * @version 1.1
  * @copyright Copyright 2012 by Qodo Ltd
  * With thanks to @Sepiariver http://www.sepiariver.ca/
  * With thanks to @hvoort
@@ -37,7 +37,7 @@ $timeline = isset($timeline) ? $timeline : 'user_timeline' ;
 $cache = isset($cache) ? $cache : 7200 ;
 $screen_name = isset($screen_name ) ? $screen_name : '' ;
 $include_rts = isset($include_rts) ? $include_rts : 1 ;
-$cache_id = isset($cache_id) ? $cache_id : 'TwitterX' ;
+$cache_id = isset($cache_id) ? $cache_id : 'TwitterX_' .  $modx->resource->id ;
 $toPlaceholder = isset($toPlaceholder) ? $toPlaceholder : '' ;
 $search = isset($search) ? $search : '' ;
 
@@ -51,7 +51,7 @@ if (!function_exists('compareTweetsByDate')) {
 	function compareTweetsByDate($a, $b) {
 		$time_a = strtotime($a->created_at);
 		$time_b = strtotime($b->created_at);
-		
+
 		if ($time_a == $time_b) {
 		  return 0;
 		}
@@ -93,51 +93,54 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 				$json = curl_exec($ch);
 				curl_close($ch);
-				
+
 				// Because search returns info on the search, we need to decode, get the results and then encode again
 				// This is so we can cache this too. Messy but it works!
 				$json = json_decode($json);
 				$json = $json->results;
 				$json = json_encode($json);
-				
+
 			} else {
-				
+
 				// Load the TwitterOAuth lib required if not exists
 				if (!class_exists('TwitterOAuth')) {
 					require_once $modx->getOption('core_path').'components/twitterx/twitteroauth/twitteroauth/twitteroauth.php';
 				}
 				// Create new twitteroauth
 				$twitteroauth = new TwitterOAuth($twitter_consumer_key, $twitter_consumer_secret, $twitter_access_token, $twitter_access_token_secret);
-	
+
 				// We want to use JSON format
 				$twitteroauth->format = 'json';
 				$twitteroauth->decode_json = FALSE;
-	
+
+				// Oops! Force USE of 1.1 API
+				$twitteroauth->host = "https://api.twitter.com/1.1/";
+
 				// Request statuses with optinal parameters
 				$options = array(
 					'count' => $limit+1,
 					'include_rts' => $include_rts
 				);
-	
+
 				// If we are viewing favourites or regular statuses
 				if ($timeline != 'favorites') {
 					$timeline = 'statuses/' . $timeline;
 				}
-				
+
 				// If we have one or multiple screen names
 				if (strpos($screen_name, ',') !== FALSE) {
-	
+
 					$tweets = array();
-	
+
 					// Collect screen_names
 					$screen_name_array = preg_split("/,/", $screen_name, -1, PREG_SPLIT_NO_EMPTY);
-	
+
 					if (count($screen_name_array) >= 1) {
 						// Get timeline for every screen name
 						foreach ($screen_name_array as $sn) {
 							$options['screen_name'] = $sn;
 							$json_part = $twitteroauth->get($timeline, $options);
-	
+
 							// No error while loading timeline
 							if (!isset($json_part->error)) {
 								$tweets = array_merge($tweets, json_decode($json_part));
@@ -165,7 +168,7 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 			
 			// No errors? Save to MODX Cache
 			if (!isset($json->error)) {
-				$modx->cacheManager->set($cache_id . '_' .  $modx->resource->id, $json, $cache);
+				$modx->cacheManager->set($cache_id, $json, $cache);
 			}
 	
 		}
