@@ -79,43 +79,42 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 	} else {
 
 		// Try loading the data from MODX cache first
-		$json = $modx->cacheManager->get($cache_id . '_' .  $modx->resource->id); // Added ability to set custom cache IDs
+		$json = $modx->cacheManager->get($cache_id); // Added ability to set custom cache IDs
 		
 		if (!$json) { 
 
+			// Load the TwitterOAuth lib required if not exists
+			if (!class_exists('TwitterOAuth')) {
+				require_once $modx->getOption('core_path').'components/twitterx/twitteroauth/twitteroauth/twitteroauth.php';
+			}
+			// Create new twitteroauth
+			$twitteroauth = new TwitterOAuth($twitter_consumer_key, $twitter_consumer_secret, $twitter_access_token, $twitter_access_token_secret);
+
+			// We want to use JSON format
+			$twitteroauth->format = 'json';
+			$twitteroauth->decode_json = FALSE;
+
+			// Oops! Force USE of 1.1 API
+			$twitteroauth->host = "https://api.twitter.com/1.1/";
 
 			// This this is a search, this doesn't need the api library so we can just use curl
 			if ($search != '') {
 
-				$ch = curl_init();
-				curl_setopt($ch, CURLOPT_URL, "http://search.twitter.com/search.json?q=" . urlencode($search) . "&rpp=" . $limit);
-				curl_setopt($ch, CURLOPT_HEADER, 0);
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-				$json = curl_exec($ch);
-				curl_close($ch);
-
-				// Because search returns info on the search, we need to decode, get the results and then encode again
-				// This is so we can cache this too. Messy but it works!
+				$timeline = 'search/tweets';
+		                $options = array(
+		                    'q' => $search,
+		                    'count' => $limit,
+		                );
+		                $json = $twitteroauth->get($timeline, $options);
+		                
+		                // Because search returns info on the search, we need to decode, get the results and then encode again
+	    			// This is so we can cache this too. Messy but it works!
 				$json = json_decode($json);
-				$json = $json->results;
+				$json = $json->statuses;
 				$json = json_encode($json);
 
 			} else {
-
-				// Load the TwitterOAuth lib required if not exists
-				if (!class_exists('TwitterOAuth')) {
-					require_once $modx->getOption('core_path').'components/twitterx/twitteroauth/twitteroauth/twitteroauth.php';
-				}
-				// Create new twitteroauth
-				$twitteroauth = new TwitterOAuth($twitter_consumer_key, $twitter_consumer_secret, $twitter_access_token, $twitter_access_token_secret);
-
-				// We want to use JSON format
-				$twitteroauth->format = 'json';
-				$twitteroauth->decode_json = FALSE;
-
-				// Oops! Force USE of 1.1 API
-				$twitteroauth->host = "https://api.twitter.com/1.1/";
-
+				
 				// Request statuses with optinal parameters
 				$options = array(
 					'count' => $limit,
