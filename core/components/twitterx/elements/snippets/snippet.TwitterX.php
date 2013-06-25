@@ -16,7 +16,7 @@
  * TwitterX is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- 
+
  * @author Stewart Orr @ Qodo Ltd <stewart@qodo.co.uk>
  * @version 1.1
  * @copyright Copyright 2012 by Qodo Ltd
@@ -40,26 +40,27 @@ $include_rts = isset($include_rts) ? $include_rts : 1 ;
 $cache_id = isset($cache_id) ? $cache_id : 'TwitterX_' .  $modx->resource->id ;
 $toPlaceholder = isset($toPlaceholder) ? $toPlaceholder : '' ;
 $search = isset($search) ? $search : '' ;
+$filter = isset($filter) ? $filter : '' ;
 
 // Here we support an old error where the parameter was incorrect.
 if (isset($twitter_consumer_token_secret)) {
-	$twitter_access_token_secret = isset($twitter_consumer_token_secret) ? $twitter_consumer_token_secret : FALSE ;
+    $twitter_access_token_secret = isset($twitter_consumer_token_secret) ? $twitter_consumer_token_secret : FALSE ;
 }
 
 // Function to compare tweets based on their creation time
 if (!function_exists('compareTweetsByDate')) {
-	function compareTweetsByDate($a, $b) {
-		$time_a = strtotime($a->created_at);
-		$time_b = strtotime($b->created_at);
+    function compareTweetsByDate($a, $b) {
+        $time_a = strtotime($a->created_at);
+        $time_b = strtotime($b->created_at);
 
-		if ($time_a == $time_b) {
-		  return 0;
-		}
-		return ($time_a > $time_b) ? -1 : 1;
-	}
+        if ($time_a == $time_b) {
+            return 0;
+        }
+        return ($time_a > $time_b) ? -1 : 1;
+    }
 }
 
-// HTML output 
+// HTML output
 $output = '';
 
 //**************************************************************************
@@ -67,178 +68,181 @@ $output = '';
 // If they haven't specified the required Twitter keys, we cannot continue...
 if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_token || !$twitter_access_token_secret) {
 
-	echo "<strong>TwitterX Error:</strong> Could not load TwitterX as required values were not passed.";
+    echo "<strong>TwitterX Error:</strong> Could not load TwitterX as required values were not passed.";
 
 } else {
 
-	// Test for required function(s)
-	if (!function_exists('curl_init')) {
-		
-			echo "<strong>TwitterX Error:</strong> cURL functions do not exist, cannot continue.";	
-			
-	} else {
+    // Test for required function(s)
+    if (!function_exists('curl_init')) {
 
-		// Try loading the data from MODX cache first
-		$json = $modx->cacheManager->get($cache_id . '_' .  $modx->resource->id); // Added ability to set custom cache IDs
-		
-		if (!$json) { 
+        echo "<strong>TwitterX Error:</strong> cURL functions do not exist, cannot continue.";
 
+    } else {
 
-			// This this is a search, this doesn't need the api library so we can just use curl
-			if ($search != '') {
+        // Try loading the data from MODX cache first
+        $json = $modx->cacheManager->get($cache_id . '_' .  $modx->resource->id); // Added ability to set custom cache IDs
 
-				$ch = curl_init();
-				curl_setopt($ch, CURLOPT_URL, "http://search.twitter.com/search.json?q=" . urlencode($search) . "&rpp=" . $limit);
-				curl_setopt($ch, CURLOPT_HEADER, 0);
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-				$json = curl_exec($ch);
-				curl_close($ch);
+        if (!$json) {
 
-				// Because search returns info on the search, we need to decode, get the results and then encode again
-				// This is so we can cache this too. Messy but it works!
-				$json = json_decode($json);
-				$json = $json->results;
-				$json = json_encode($json);
+            // Load the TwitterOAuth lib required if not exists
+            if (!class_exists('TwitterOAuth')) {
+                require_once $modx->getOption('core_path').'components/twitterx/twitteroauth/twitteroauth/twitteroauth.php';
+            }
+            // Create new twitteroauth
+            $twitteroauth = new TwitterOAuth($twitter_consumer_key, $twitter_consumer_secret, $twitter_access_token, $twitter_access_token_secret);
 
-			} else {
+            // We want to use JSON format
+            $twitteroauth->format = 'json';
+            $twitteroauth->decode_json = FALSE;
 
-				// Load the TwitterOAuth lib required if not exists
-				if (!class_exists('TwitterOAuth')) {
-					require_once $modx->getOption('core_path').'components/twitterx/twitteroauth/twitteroauth/twitteroauth.php';
-				}
-				// Create new twitteroauth
-				$twitteroauth = new TwitterOAuth($twitter_consumer_key, $twitter_consumer_secret, $twitter_access_token, $twitter_access_token_secret);
+            // Oops! Force USE of 1.1 API
+            $twitteroauth->host = "https://api.twitter.com/1.1/";
 
-				// We want to use JSON format
-				$twitteroauth->format = 'json';
-				$twitteroauth->decode_json = FALSE;
+            // Request statuses with optional parameters
+            $options = array(
+                'count' => $limit,
+                'include_rts' => $include_rts
+            );
 
-				// Oops! Force USE of 1.1 API
-				$twitteroauth->host = "https://api.twitter.com/1.1/";
+            // If we're doing a search, bypass screen names
+            // Note: searches might not work how you want them to. They are not complete and will only access the last week-ish of tweets
+            // https://dev.twitter.com/docs/using-search
+            if ($search) {
 
-				// Request statuses with optinal parameters
-				$options = array(
-					'count' => $limit,
-					'include_rts' => $include_rts
-				);
+                $timeline = 'search/tweets';
+                $options['q'] = urlencode($search);
+                $json = $twitteroauth->get($timeline, $options);
 
-				// If we are viewing favourites or regular statuses
-				if ($timeline != 'favorites') {
-					$timeline = 'statuses/' . $timeline;
-				}
+            } else {
 
-				// If we have one or multiple screen names
-				if (strpos($screen_name, ',') !== FALSE) {
+                // If we are viewing favourites or regular statuses
+                if ($timeline != 'favorites') {
+                    $timeline = 'statuses/' . $timeline;
+                }
 
-					$tweets = array();
+                // If we have one or multiple screen names
+                if (strpos($screen_name, ',') !== FALSE) {
 
-					// Collect screen_names
-					$screen_name_array = preg_split("/,/", $screen_name, -1, PREG_SPLIT_NO_EMPTY);
+                    $tweets = array();
 
-					if (count($screen_name_array) >= 1) {
-						// Get timeline for every screen name
-						foreach ($screen_name_array as $sn) {
-							$options['screen_name'] = $sn;
-							$json_part = $twitteroauth->get($timeline, $options);
+                    // Collect screen_names
+                    $screen_name_array = preg_split("/,/", $screen_name, -1, PREG_SPLIT_NO_EMPTY);
 
-							// No error while loading timeline
-							if (!isset($json_part->error)) {
-								$tweets = array_merge($tweets, json_decode($json_part));
-							}
-						}
-					}
-					// Sort mixed tweets of different users
-					usort($tweets, 'compareTweetsByDate');
-	
-					// Limit the combined result
-					$tweets = array_slice($tweets, 0, $limit);
-					
-					// Convert array to json for saving to cache
-					$json = json_encode($tweets);
-					
-				} else {
-					// If we have a single screen_name, pass this to Twitter API
-					if ($screen_name != '') {
-						$options['screen_name'] = $screen_name;	
-					}
-					$json = $twitteroauth->get($timeline, $options);
-				}
-				
-			}
-			
-			// No errors? Save to MODX Cache
-			if (!isset($json->error)) {
-				$modx->cacheManager->set($cache_id, $json, $cache);
-			}
-	
-		}
-	
-		// Decode this now that we have used it above in the cache
-		$json = json_decode($json);
-	
-		// If there any errors from Twitter, output them...
-		if (isset($json->errors)) {
-			
-			foreach($json->errors as $err) {
-				$output .= "<strong>TwitterX Error:</strong> Could not load tweets as Twitter responded with the error: '" . $err->message . "'.";				
-			}
-			
-		} else {
+                    if (count($screen_name_array) >= 1) {
+                        // Get timeline for every screen name
+                        foreach ($screen_name_array as $sn) {
+                            $options['screen_name'] = $sn;
+                            $json_part = $twitteroauth->get($timeline, $options);
 
-			// Any tweets present?
-			if (is_array($json) && count($json) > 0) {
+                            // No error while loading timeline
+                            if (!isset($json_part->error)) {
+                                $tweets = array_merge($tweets, json_decode($json_part));
+                            }
+                        }
+                    }
+                    // Sort mixed tweets of different users
+                    usort($tweets, 'compareTweetsByDate');
 
-				// For each result, output it
-				foreach ($json as $j) {
-					
-					
-					
-					// Get placerholder values
-					// This has been updated to use search values if present
-					$placeholders = array(
-						'created_at' => $j->created_at,
-						'source' => $j->source,
-						'id' => $j->id,
-						'id_str' => $j->id_str,
-						'text' => $j->text,
-						'name' => ($j->from_user_name) ? $j->from_user_name : $j->user->name,
-						'screen_name' => ($j->from_user) ? $j->from_user : $j->user->screen_name,
-						'profile_image_url' => ($j->profile_image_url) ? $j->profile_image_url : $j->user->profile_image_url,
-						'location' => $j->user->location,
-						'url' => $j->user->url,
-						'description' => $j->user->description,
-					);
-					
-					// If this is a retweet, create placeholders for this too
-					if (isset($j->retweeted_status)) {
-						$placeholders = array_merge($placeholders, array(
-							'retweet_count' => $j->retweeted_status->retweet_count,
-							'retweet_created_at' => $j->retweeted_status->created_at,
-							'retweet_source' => $j->retweeted_status->source,
-							'retweet_id' => $j->retweeted_status->id,
-							'retweet_id_str' => $j->retweeted_status->id_str,
-							'retweet_text' => $j->retweeted_status->text,
-							'retweet_name' => $j->retweeted_status->user->name,
-							'retweet_screen_name' => $j->retweeted_status->user->screen_name,
-							'retweet_profile_image_url' => $j->retweeted_status->user->profile_image_url,
-							'retweet_location' => $j->retweeted_status->user->location,
-							'retweet_url' => $j->retweeted_status->user->url,
-							'retweet_description' => $j->retweeted_status->user->description,
-							)
-						);
-					}
-					// Parse chunk passing values
-					$output .= $modx->getChunk($chunk, $placeholders); // Concatenate to output variable
-				}
-			}
+                    // Limit the combined result
+                    $tweets = array_slice($tweets, 0, $limit);
 
-		}
-		
-		// Added option to output to placeholder
-		if ($toPlaceholder != '') {
-			$modx->setPlaceholder($toPlaceholder, $output);
-		} else {
-			return $output;
-		}
-	}
+                    // Convert array to json for saving to cache
+                    $json = json_encode($tweets);
+
+                } else {
+                    // If we have a single screen_name, pass this to Twitter API
+                    if ($screen_name != '') {
+                        $options['screen_name'] = $screen_name;
+                    }
+                    $json = $twitteroauth->get($timeline, $options);
+                }
+            }
+
+            // Filter by regex
+            if ($filter) {
+                $filter_array = json_decode($json);
+                $json = array_filter($filter_array, function($var) use ($filter, &$modx) {
+                    $result = preg_match($filter,$var->text) == 1 ? true : false;
+                    return $result;
+                });
+                $json = json_encode($json);
+            }
+
+            // No errors? Save to MODX Cache
+            if (!isset($json->error)) {
+                $modx->cacheManager->set($cache_id, $json, $cache);
+            }
+        }
+
+        // Decode this now that we have used it above in the cache
+        $json = json_decode($json,true);
+
+        // If there any errors from Twitter, output them...
+        if (isset($json->errors)) {
+
+            foreach($json->errors as $err) {
+                $output .= "<strong>TwitterX Error:</strong> Could not load tweets as Twitter responded with the error: '" . $err->message . "'.";
+            }
+
+        } else {
+
+            // If using search, get tweets
+            if ($search) {
+                $json = $json->statuses;
+            }
+
+            // Any tweets present?
+            if (is_array($json) && count($json) > 0) {
+
+                // For each result, output it
+                foreach ($json as $j) {
+
+                    // Get placeholder values
+                    // This has been updated to use search values if present
+                    $placeholders = array(
+                        'created_at' => $j['created_at'],
+                        'source' => $j['source'],
+                        'id' => $j['id'],
+                        'id_str' => $j['id_str'],
+                        'text' => $j['text'],
+                        'name' => ($j['from_user_name']) ? $j['from_user_name'] : $j['user']['name'],
+                        'screen_name' => ($j['from_user']) ? $j['from_user'] : $j['user->screen_name'],
+                        'profile_image_url' => ($j['profile_image_url']) ? $j['profile_image_url'] : $j['user']['profile_image_url'],
+                        'location' => $j['user']['location'],
+                        'url' => $j['user']['url'],
+                        'description' => $j['user']['description']
+                    );
+
+                    // If this is a retweet, create placeholders for this too
+                    if (isset($j->retweeted_status)) {
+                        $placeholders = array_merge($placeholders, array(
+                                'retweet_count' => $j['retweeted_status']['retweet_count'],
+                                'retweet_created_at' => $j['retweeted_status']['created_at'],
+                                'retweet_source' => $j['retweeted_status']['source'],
+                                'retweet_id' => $j['retweeted_status']['id'],
+                                'retweet_id_str' => $j['retweeted_status']['id_str'],
+                                'retweet_text' => $j['retweeted_status']['text'],
+                                'retweet_name' => $j['retweeted_status']['user']['name'],
+                                'retweet_screen_name' => $j['retweeted_status']['user']['screen_name'],
+                                'retweet_profile_image_url' => $j['retweeted_status']['user']['profile_image_url'],
+                                'retweet_location' => $j['retweeted_status']['user']['location'],
+                                'retweet_url' => $j['retweeted_status']['user']['url'],
+                                'retweet_description' => $j['retweeted_status']['user']['description']
+                            )
+                        );
+                    }
+                    // Parse chunk passing values
+                    $output .= $modx->getChunk($chunk, $placeholders); // Concatenate to output variable
+                }
+            }
+
+        }
+
+        // Added option to output to placeholder
+        if ($toPlaceholder != '') {
+            $modx->setPlaceholder($toPlaceholder, $output);
+        } else {
+            return $output;
+        }
+    }
 }
