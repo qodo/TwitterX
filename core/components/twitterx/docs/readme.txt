@@ -1,4 +1,4 @@
-TwitterX v1.1
+TwitterX v1.2
 ==============
 
 This uses twitteroauth: https://github.com/abraham/twitteroauth
@@ -41,21 +41,19 @@ screen_name - which user you want to load
 include_rts - should this include retweets (default: 1)
 cache_id - unique ID for caching in case you want to view multiple feeds or different feeds (default: TwitterX_PAGEID)
 toPlaceholder - a placeholder ID if you want to use content as a placeholder instead of outputting directly (default: '')
-
+filter - An optional regular expression to filter the tweets (default: '')
 
 
 Loading timelines
 -----------------
 
-The snippet defaults to user_time line but you can load any of these:
+As the 1.1 API is more restrictive the tweets available have changed. The snippet defaults to user_time line but you can load any of these:
 
 public_timeline
 public_timeline
 friends_timeline
 user_timeline
 mentions
-retweeted_by_me
-retweeted_to_me
 retweets_of_me
 
 
@@ -65,8 +63,6 @@ Searching Twitter
 TwitterX now supports basic Twitter searches using the &search parameter:
 
 &search=`MODX`
-
-When using this parameter, screen_name and timeline are ignored.
 
 
 
@@ -98,7 +94,7 @@ description - This users profile information
 
 
 
-Retweets (where applicable
+Retweets (where applicable)
 --------------------------
 
 retweet_created_at - date status was created
@@ -123,4 +119,4 @@ For information and support, check out my blog:
 http://www.qodo.co.uk/blog/twitterx-a-new-modx-extra-for-pulling-in-twitter-feeds-using-api-1.1/
 
 Created by Stewart Orr @ Qodo Ltd (http://www.qodo.co.uk).
-Contributers: @sepiariver (http://www.sepiariver.ca)
+Contributers: @sepiariver (http://www.sepiariver.ca), @OostDesign (http://www.oostdesign.com/), @scottborys (http://scottborys.com/)

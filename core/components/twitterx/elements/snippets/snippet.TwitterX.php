@@ -18,10 +18,11 @@
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  
  * @author Stewart Orr @ Qodo Ltd <stewart@qodo.co.uk>
- * @version 1.1
- * @copyright Copyright 2012 by Qodo Ltd
+ * @version 1.2
+ * @copyright Copyright 2013 by Qodo Ltd
  * With thanks to @Sepiariver http://www.sepiariver.ca/
  * With thanks to @hvoort
+ * With thanks to @OostDesign
  */
 
 // Twitter API keys and secrets
@@ -40,6 +41,7 @@ $include_rts = isset($include_rts) ? $include_rts : 1 ;
 $cache_id = isset($cache_id) ? $cache_id : 'TwitterX_' .  $modx->resource->id ;
 $toPlaceholder = isset($toPlaceholder) ? $toPlaceholder : '' ;
 $search = isset($search) ? $search : '' ;
+$filter = isset($filter) ? $filter : '' ; // Thanks to scottborys
 
 // Here we support an old error where the parameter was incorrect.
 if (isset($twitter_consumer_token_secret)) {
@@ -96,19 +98,19 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 
 			// Oops! Force USE of 1.1 API
 			$twitteroauth->host = "https://api.twitter.com/1.1/";
-
-			// This this is a search, this doesn't need the api library so we can just use curl
+			
+			// If we are doing a search, we use the search timeline
 			if ($search != '') {
 
 				$timeline = 'search/tweets';
-		                $options = array(
-		                    'q' => $search,
-		                    'count' => $limit,
-		                );
-		                $json = $twitteroauth->get($timeline, $options);
+				$options = array(
+					'q' => $search,
+					'count' => $limit,
+				);
+				$json = $twitteroauth->get($timeline, $options);
 		                
-		                // Because search returns info on the search, we need to decode, get the results and then encode again
-	    			// This is so we can cache this too. Messy but it works!
+                // Because search returns info on the search, we need to decode, get the results and then encode again
+    			// This is so we can cache this too. Messy but it works!
 				$json = json_decode($json);
 				$json = $json->statuses;
 				$json = json_encode($json);
@@ -165,6 +167,16 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 				
 			}
 			
+			// Filter by regex
+			if ($filter) {
+				$filter_array = json_decode($json);
+				$json = array_filter($filter_array, function($var) use ($filter, &$modx) {
+					$result = preg_match($filter,$var->text) == 1 ? true : false;
+					return $result;
+				});
+				$json = json_encode($json);
+			} 			
+			
 			// No errors? Save to MODX Cache
 			if (!isset($json->error)) {
 				$modx->cacheManager->set($cache_id, $json, $cache);
@@ -187,10 +199,8 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 			// Any tweets present?
 			if (is_array($json) && count($json) > 0) {
 
-				// For each result, output it
+				// For each result, build output values
 				foreach ($json as $j) {
-					
-					
 					
 					// Get placerholder values
 					// This has been updated to use search values if present
@@ -230,7 +240,6 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 					$output .= $modx->getChunk($chunk, $placeholders); // Concatenate to output variable
 				}
 			}
-
 		}
 		
 		// Added option to output to placeholder
