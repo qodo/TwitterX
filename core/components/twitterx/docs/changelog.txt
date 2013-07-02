@@ -2,8 +2,7 @@ Changelog for TwitterX package.
 
 TwitterX 1.2 - 12/06/2013
 ===================================== 
-- Fixed twitter search problem - thanks OostDesign & Scott
-- Filter option added so you can use regular expression on tweets
+- Fixed twitter search problem - thanks OostDesign
 
 TwitterX 1.1 - 12/06/2013
 ===================================== 

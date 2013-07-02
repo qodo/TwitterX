@@ -41,7 +41,6 @@ screen_name - which user you want to load
 include_rts - should this include retweets (default: 1)
 cache_id - unique ID for caching in case you want to view multiple feeds or different feeds (default: TwitterX_PAGEID)
 toPlaceholder - a placeholder ID if you want to use content as a placeholder instead of outputting directly (default: '')
-filter - An optional regular expression to filter the tweets (default: '')
 
 
 Loading timelines

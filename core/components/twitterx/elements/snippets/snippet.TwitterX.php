@@ -41,7 +41,6 @@ $include_rts = isset($include_rts) ? $include_rts : 1 ;
 $cache_id = isset($cache_id) ? $cache_id : 'TwitterX_' .  $modx->resource->id ;
 $toPlaceholder = isset($toPlaceholder) ? $toPlaceholder : '' ;
 $search = isset($search) ? $search : '' ;
-$filter = isset($filter) ? $filter : '' ; // Thanks to scottborys
 
 // Here we support an old error where the parameter was incorrect.
 if (isset($twitter_consumer_token_secret)) {
@@ -166,16 +165,6 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 				}
 				
 			}
-			
-			// Filter by regex
-			if ($filter) {
-				$filter_array = json_decode($json);
-				$json = array_filter($filter_array, function($var) use ($filter, &$modx) {
-					$result = preg_match($filter,$var->text) == 1 ? true : false;
-					return $result;
-				});
-				$json = json_encode($json);
-			} 			
 			
 			// No errors? Save to MODX Cache
 			if (!isset($json->error)) {
