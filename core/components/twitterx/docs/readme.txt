@@ -1,5 +1,5 @@
-TwitterX v1.2
-==============
+TwitterX v1.3.1
+===============
 
 This uses twitteroauth: https://github.com/abraham/twitteroauth
 
@@ -41,6 +41,9 @@ screen_name - which user you want to load
 include_rts - should this include retweets (default: 1)
 cache_id - unique ID for caching in case you want to view multiple feeds or different feeds (default: TwitterX_PAGEID)
 toPlaceholder - a placeholder ID if you want to use content as a placeholder instead of outputting directly (default: '')
+toPlaceholderPrefix - if you want to prefix the placeholder values. E.g. 'twitterx' would create placeholders like [[*twitterx.text]] (default: '')
+slug - for when loading a twitter list, you must specify a screen_name and a slug (default: '')
+
 
 
 Loading timelines
@@ -54,6 +57,25 @@ friends_timeline
 user_timeline
 mentions
 retweets_of_me
+favourites
+
+
+
+Loading lists ** New as of 1.3 **
+---------------------------------
+
+You can now load lists by using the following:
+
+	&timeline=`lists/statuses`
+	&slug=`NAME_OF_YOUR_SLUG`
+	&screen_name=`SCREEN_NAME_OF_LIST_OWNER`
+
+An example of this would be the MODX List: https://twitter.com/modx/the-modx-team
+
+	&timeline=`lists/statuses`
+	&slug=`the-modx-team`
+	&screen_name=`modx`
+
 
 
 Searching Twitter

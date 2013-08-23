@@ -1,5 +1,5 @@
-TwitterX v1.0
-==============
+TwitterX v1.3.1
+===============
 
 This uses twitteroauth: https://github.com/abraham/twitteroauth
 
@@ -23,10 +23,10 @@ This should be called uncached if you are using :ago in the chunk otherwise it c
     &twitter_access_token_secret=`dddd`
     &limit=`4`
     &timeline=`user_timeline`
-	&chunk=`TwitterXTpl`
-	&cache=`7200`
-	&screen_name=`Qodo,Microsoft`
-	&include_rts=`1`
+    &chunk=`TwitterXTpl`
+    &cache=`7200`
+    &screen_name=`Qodo,Microsoft`
+    &include_rts=`1`
 ]]
 
 twitter_consumer_key - your twitter consumer token (REQUIRED)
@@ -39,24 +39,43 @@ chunk - which chunk to load when rendering the statuses (default: TwitterXTpl)
 cache - how many seconds to cache the twitter data feed (default: 7200)
 screen_name - which user you want to load
 include_rts - should this include retweets (default: 1)
-cache_id - unique ID for caching in case you want to view multiple feeds or different feeds (default: TwitterX)
+cache_id - unique ID for caching in case you want to view multiple feeds or different feeds (default: TwitterX_PAGEID)
 toPlaceholder - a placeholder ID if you want to use content as a placeholder instead of outputting directly (default: '')
+toPlaceholderPrefix - if you want to prefix the placeholder values. E.g. 'twitterx' would create placeholders like [[*twitterx.text]] (default: '')
+slug - for when loading a twitter list, you must specify a screen_name and a slug (default: '')
 
 
 
 Loading timelines
 -----------------
 
-The snippet defaults to user_time line but you can load any of these:
+As the 1.1 API is more restrictive the tweets available have changed. The snippet defaults to user_time line but you can load any of these:
 
 public_timeline
 public_timeline
 friends_timeline
 user_timeline
 mentions
-retweeted_by_me
-retweeted_to_me
 retweets_of_me
+favourites
+
+
+
+Loading lists ** New as of 1.3 **
+---------------------------------
+
+You can now load lists by using the following:
+
+    &timeline=`lists/statuses`
+    &slug=`NAME_OF_YOUR_SLUG`
+    &screen_name=`SCREEN_NAME_OF_LIST_OWNER`
+
+An example of this would be the MODX List: https://twitter.com/modx/the-modx-team
+
+    &timeline=`lists/statuses`
+    &slug=`the-modx-team`
+    &screen_name=`modx`
+
 
 
 Searching Twitter
@@ -65,8 +84,6 @@ Searching Twitter
 TwitterX now supports basic Twitter searches using the &search parameter:
 
 &search=`MODX`
-
-When using this parameter, screen_name and timeline are ignored.
 
 
 
@@ -98,7 +115,7 @@ description - This users profile information
 
 
 
-Retweets (where applicable
+Retweets (where applicable)
 --------------------------
 
 retweet_created_at - date status was created
@@ -123,4 +140,4 @@ For information and support, check out my blog:
 http://www.qodo.co.uk/blog/twitterx-a-new-modx-extra-for-pulling-in-twitter-feeds-using-api-1.1/
 
 Created by Stewart Orr @ Qodo Ltd (http://www.qodo.co.uk).
-Contributers: @sepiariver (http://www.sepiariver.ca)
+Contributers: @sepiariver (http://www.sepiariver.ca), @OostDesign (http://www.oostdesign.com/), @scottborys (http://scottborys.com/)

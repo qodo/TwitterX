@@ -16,9 +16,9 @@
  * TwitterX is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- 
+
  * @author Stewart Orr @ Qodo Ltd <stewart@qodo.co.uk>
- * @version 1.2
+ * @version 1.3.1
  * @copyright Copyright 2013 by Qodo Ltd
  * With thanks to @Sepiariver http://www.sepiariver.ca/
  * With thanks to @hvoort
@@ -40,7 +40,9 @@ $screen_name = isset($screen_name ) ? $screen_name : '' ;
 $include_rts = isset($include_rts) ? $include_rts : 1 ;
 $cache_id = isset($cache_id) ? $cache_id : 'TwitterX_' .  $modx->resource->id ;
 $toPlaceholder = isset($toPlaceholder) ? $toPlaceholder : '' ;
+$toPlaceholderPrefix = isset($toPlaceholderPrefix) ? $toPlaceholderPrefix . "." : '' ; // If you want to prefix the placeholders
 $search = isset($search) ? $search : '' ;
+$slug = isset($slug) ? $slug : '' ; // Slug is only used when viewing a list
 
 // Here we support an old error where the parameter was incorrect.
 if (isset($twitter_consumer_token_secret)) {
@@ -97,7 +99,7 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 
 			// Oops! Force USE of 1.1 API
 			$twitteroauth->host = "https://api.twitter.com/1.1/";
-			
+
 			// If we are doing a search, we use the search timeline
 			if ($search != '') {
 
@@ -115,7 +117,7 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 				$json = json_encode($json);
 
 			} else {
-				
+
 				// Request statuses with optinal parameters
 				$options = array(
 					'count' => $limit,
@@ -123,9 +125,13 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 				);
 
 				// If we are viewing favourites or regular statuses
-				if ($timeline != 'favorites') {
+				if ($timeline != 'favorites' && $timeline != 'lists/statuses') {
 					$timeline = 'statuses/' . $timeline;
 				}
+
+				// Favourites - thanks to @sepiariver
+				if ($timeline === 'favorites') { $timeline = $timeline . '/list'; }
+
 
 				// If we have one or multiple screen names
 				if (strpos($screen_name, ',') !== FALSE) {
@@ -149,40 +155,44 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 					}
 					// Sort mixed tweets of different users
 					usort($tweets, 'compareTweetsByDate');
-	
+
 					// Limit the combined result
 					$tweets = array_slice($tweets, 0, $limit);
-					
+
 					// Convert array to json for saving to cache
 					$json = json_encode($tweets);
-					
+
 				} else {
-					// If we have a single screen_name, pass this to Twitter API
-					if ($screen_name != '') {
+					// Here we are looking to see if we want a list instead of timeline
+					if ($slug != '') {
+						$options['owner_screen_name'] = $screen_name;
+						$options['slug'] = $slug;
+					} elseif ($screen_name != '') {
+						// If we have a single screen_name, pass this to Twitter API
 						$options['screen_name'] = $screen_name;	
 					}
 					$json = $twitteroauth->get($timeline, $options);
 				}
-				
+
 			}
-			
+
 			// No errors? Save to MODX Cache
 			if (!isset($json->error)) {
 				$modx->cacheManager->set($cache_id, $json, $cache);
 			}
-	
+
 		}
-	
+
 		// Decode this now that we have used it above in the cache
 		$json = json_decode($json);
-	
+
 		// If there any errors from Twitter, output them...
 		if (isset($json->errors)) {
-			
+
 			foreach($json->errors as $err) {
 				$output .= "<strong>TwitterX Error:</strong> Could not load tweets as Twitter responded with the error: '" . $err->message . "'.";				
 			}
-			
+
 		} else {
 
 			// Any tweets present?
@@ -190,47 +200,48 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 
 				// For each result, build output values
 				foreach ($json as $j) {
-					
+
 					// Get placerholder values
 					// This has been updated to use search values if present
 					$placeholders = array(
-						'created_at' => $j->created_at,
-						'source' => $j->source,
-						'id' => $j->id,
-						'id_str' => $j->id_str,
-						'text' => $j->text,
-						'name' => ($j->from_user_name) ? $j->from_user_name : $j->user->name,
-						'screen_name' => ($j->from_user) ? $j->from_user : $j->user->screen_name,
-						'profile_image_url' => ($j->profile_image_url) ? $j->profile_image_url : $j->user->profile_image_url,
-						'location' => $j->user->location,
-						'url' => $j->user->url,
-						'description' => $j->user->description,
+						$toPlaceholderPrefix . 'created_at' => $j->created_at,
+						$toPlaceholderPrefix . 'source' => $j->source,
+						$toPlaceholderPrefix . 'id' => $j->id,
+						$toPlaceholderPrefix . 'id_str' => $j->id_str,
+						$toPlaceholderPrefix . 'text' => $j->text,
+						$toPlaceholderPrefix . 'name' => ($j->from_user_name) ? $j->from_user_name : $j->user->name,
+						$toPlaceholderPrefix . 'screen_name' => ($j->from_user) ? $j->from_user : $j->user->screen_name,
+						$toPlaceholderPrefix . 'profile_image_url' => ($j->profile_image_url) ? $j->profile_image_url : $j->user->profile_image_url,
+						$toPlaceholderPrefix . 'location' => $j->user->location,
+						$toPlaceholderPrefix . 'url' => $j->user->url,
+						$toPlaceholderPrefix . 'description' => $j->user->description,
 					);
-					
+
 					// If this is a retweet, create placeholders for this too
 					if (isset($j->retweeted_status)) {
 						$placeholders = array_merge($placeholders, array(
-							'retweet_count' => $j->retweeted_status->retweet_count,
-							'retweet_created_at' => $j->retweeted_status->created_at,
-							'retweet_source' => $j->retweeted_status->source,
-							'retweet_id' => $j->retweeted_status->id,
-							'retweet_id_str' => $j->retweeted_status->id_str,
-							'retweet_text' => $j->retweeted_status->text,
-							'retweet_name' => $j->retweeted_status->user->name,
-							'retweet_screen_name' => $j->retweeted_status->user->screen_name,
-							'retweet_profile_image_url' => $j->retweeted_status->user->profile_image_url,
-							'retweet_location' => $j->retweeted_status->user->location,
-							'retweet_url' => $j->retweeted_status->user->url,
-							'retweet_description' => $j->retweeted_status->user->description,
+							$toPlaceholderPrefix . 'retweet_count' => $j->retweeted_status->retweet_count,
+							$toPlaceholderPrefix . 'retweet_created_at' => $j->retweeted_status->created_at,
+							$toPlaceholderPrefix . 'retweet_source' => $j->retweeted_status->source,
+							$toPlaceholderPrefix . 'retweet_id' => $j->retweeted_status->id,
+							$toPlaceholderPrefix . 'retweet_id_str' => $j->retweeted_status->id_str,
+							$toPlaceholderPrefix . 'retweet_text' => $j->retweeted_status->text,
+							$toPlaceholderPrefix . 'retweet_name' => $j->retweeted_status->user->name,
+							$toPlaceholderPrefix . 'retweet_screen_name' => $j->retweeted_status->user->screen_name,
+							$toPlaceholderPrefix . 'retweet_profile_image_url' => $j->retweeted_status->user->profile_image_url,
+							$toPlaceholderPrefix . 'retweet_location' => $j->retweeted_status->user->location,
+							$toPlaceholderPrefix . 'retweet_url' => $j->retweeted_status->user->url,
+							$toPlaceholderPrefix . 'retweet_description' => $j->retweeted_status->user->description,
 							)
 						);
 					}
+
 					// Parse chunk passing values
 					$output .= $modx->getChunk($chunk, $placeholders); // Concatenate to output variable
 				}
 			}
 		}
-		
+
 		// Added option to output to placeholder
 		if ($toPlaceholder != '') {
 			$modx->setPlaceholder($toPlaceholder, $output);

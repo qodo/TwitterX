@@ -14,7 +14,7 @@
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  
  * @author Stewart Orr @ Qodo Ltd <stewart@qodo.co.uk>
- * @version 1.2
+ * @version 1.3,1
  * @copyright Copyright 2012 by Qodo Ltd
  */
 
