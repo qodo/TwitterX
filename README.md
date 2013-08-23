@@ -29,20 +29,20 @@ This should be called uncached if you are using :ago in the chunk otherwise it c
     &include_rts=`1`
 ]]
 
-twitter_consumer_key - your twitter consumer token (REQUIRED)
-twitter_consumer_secret - your twitter consumer secret (REQUIRED)
-twitter_access_token - your twitter access token (REQUIRED)
-twitter_access_token_secret - your twitter access token secret (REQUIRED)
-limit - limit how many statuses to display (default: 5)
-timeline - which twitter timeline to load (default: user_timeline, retweeted_by_me etc)
-chunk - which chunk to load when rendering the statuses (default: TwitterXTpl)
-cache - how many seconds to cache the twitter data feed (default: 7200)
-screen_name - which user you want to load
-include_rts - should this include retweets (default: 1)
-cache_id - unique ID for caching in case you want to view multiple feeds or different feeds (default: TwitterX_PAGEID)
-toPlaceholder - a placeholder ID if you want to use content as a placeholder instead of outputting directly (default: '')
-toPlaceholderPrefix - if you want to prefix the placeholder values. E.g. 'twitterx' would create placeholders like [[*twitterx.text]] (default: '')
-slug - for when loading a twitter list, you must specify a screen_name and a slug (default: '')
+* twitter_consumer_key - your twitter consumer token (REQUIRED)
+* twitter_consumer_secret - your twitter consumer secret (REQUIRED)
+* twitter_access_token - your twitter access token (REQUIRED)
+* twitter_access_token_secret - your twitter access token secret (REQUIRED)
+* limit - limit how many statuses to display (default: 5)
+* timeline - which twitter timeline to load (default: user_timeline, retweeted_by_me etc)
+* chunk - which chunk to load when rendering the statuses (default: TwitterXTpl)
+* cache - how many seconds to cache the twitter data feed (default: 7200)
+* screen_name - which user you want to load
+* include_rts - should this include retweets (default: 1)
+* cache_id - unique ID for caching in case you want to view multiple feeds or different feeds (default: TwitterX_PAGEID)
+* toPlaceholder - a placeholder ID if you want to use content as a placeholder instead of outputting directly (default: '')
+* toPlaceholderPrefix - if you want to prefix the placeholder values. E.g. 'twitterx' would create placeholders like [[*twitterx.text]] (default: '')
+* slug - for when loading a twitter list, you must specify a screen_name and a slug (default: '')
 
 
 
@@ -51,13 +51,13 @@ Loading timelines
 
 As the 1.1 API is more restrictive the tweets available have changed. The snippet defaults to user_time line but you can load any of these:
 
-public_timeline
-public_timeline
-friends_timeline
-user_timeline
-mentions
-retweets_of_me
-favourites
+* public_timeline
+* public_timeline
+* friends_timeline
+* user_timeline
+* mentions
+* retweets_of_me
+* favourites
 
 
 
@@ -101,34 +101,34 @@ Chunk options
 
 The package comes with a chunk for displaying the statuses called 'TwitterXTpl'. You can customise this by using the following placeholders:
 
-created_at - date status was created
-source - source of the Tweet (application like web, iOS etc)
-id - status id on timeline
-id_str - status id on Twitter (twitter.com/user/statuses/id_str)
-text - status main text
-name - Twitter name
-screen_name - Twitter username
-profile_image_url - Twitter avatar image url for this user
-location - This users location
-url - This users URL (if specified)
-description - This users profile information
+* created_at - date status was created
+* source - source of the Tweet (application like web, iOS etc)
+* id - status id on timeline
+* id_str - status id on Twitter (twitter.com/user/statuses/id_str)
+* text - status main text
+* name - Twitter name
+* screen_name - Twitter username
+* profile_image_url - Twitter avatar image url for this user
+* location - This users location
+* url - This users URL (if specified)
+* description - This users profile information
 
 
 
 Retweets (where applicable)
 --------------------------
 
-retweet_created_at - date status was created
-retweet_source - source of the Tweet (application like web, iOS etc)
-retweet_id - status id on timeline
-retweet_id_str - status id on Twitter (twitter.com/user/statuses/id_str)
-retweet_text - status main text
-retweet_name - Twitter name
-retweet_screen_name - Twitter username
-retweet_profile_image_url - Twitter avatar image url for this user
-retweet_location - This users location
-retweet_url - This users URL (if specified)
-retweet_description - This users profile information
+* retweet_created_at - date status was created
+* retweet_source - source of the Tweet (application like web, iOS etc)
+* retweet_id - status id on timeline
+* retweet_id_str - status id on Twitter (twitter.com/user/statuses/id_str)
+* retweet_text - status main text
+* retweet_name - Twitter name
+* retweet_screen_name - Twitter username
+* retweet_profile_image_url - Twitter avatar image url for this user
+* retweet_location - This users location
+* retweet_url - This users URL (if specified)
+* retweet_description - This users profile information
 
 
 
