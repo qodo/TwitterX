@@ -1,4 +1,4 @@
-TwitterX v1.3.1
+TwitterX v1.3.2
 ===============
 
 This uses twitteroauth: https://github.com/abraham/twitteroauth

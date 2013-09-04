@@ -18,7 +18,7 @@
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
  * @author Stewart Orr @ Qodo Ltd <stewart@qodo.co.uk>
- * @version 1.3.1
+ * @version 1.3.2
  * @copyright Copyright 2013 by Qodo Ltd
  * With thanks to @Sepiariver http://www.sepiariver.ca/
  * With thanks to @hvoort
@@ -209,9 +209,9 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 						$toPlaceholderPrefix . 'id' => $j->id,
 						$toPlaceholderPrefix . 'id_str' => $j->id_str,
 						$toPlaceholderPrefix . 'text' => $j->text,
-						$toPlaceholderPrefix . 'name' => ($j->from_user_name) ? $j->from_user_name : $j->user->name,
-						$toPlaceholderPrefix . 'screen_name' => ($j->from_user) ? $j->from_user : $j->user->screen_name,
-						$toPlaceholderPrefix . 'profile_image_url' => ($j->profile_image_url) ? $j->profile_image_url : $j->user->profile_image_url,
+						$toPlaceholderPrefix . 'name' => isset($j->from_user_name) ? $j->from_user_name : $j->user->name,
+						$toPlaceholderPrefix . 'screen_name' => isset($j->from_user) ? $j->from_user : $j->user->screen_name,
+						$toPlaceholderPrefix . 'profile_image_url' => isset($j->profile_image_url) ? $j->profile_image_url : $j->user->profile_image_url,
 						$toPlaceholderPrefix . 'location' => $j->user->location,
 						$toPlaceholderPrefix . 'url' => $j->user->url,
 						$toPlaceholderPrefix . 'description' => $j->user->description,
