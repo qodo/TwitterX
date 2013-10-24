@@ -18,7 +18,7 @@
  * @copyright Copyright 2012 by Qodo Ltd
  */
 
-$search = array('|(http://[^ ]+)|', '|@([\w_]+)|', '|#([A-Za-z0-9-_]+)|');
-$replace = array('<a href="$1" target="_blank" rel="nofollow">$1</a>', '<a href="http://twitter.com/$1" target="_blank" rel="nofollow">@$1</a>', '<a href="http://twitter.com/search?q=%23$1" target="_blank" rel="nofollow">#$1</a>');
-$output = preg_replace($search, $replace, $input);
+$output = preg_replace('/(https?:\/\/[^\s"<>]+)/','<a href="$1">$1</a>', $input);
+$output = preg_replace('/(^|[\n\s])#([^\s"\t\n\r<:]*)/is', '$1<a href="http://twitter.com/search?q=%23$2">#$2</a>', $output);
+$output = preg_replace('/(^|[\n\s])@([^\s"\t\n\r<:]*)/is', '$1<a href="http://twitter.com/$2">@$2</a>', $output);
 return $output;

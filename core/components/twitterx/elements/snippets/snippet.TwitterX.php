@@ -62,6 +62,12 @@ if (!function_exists('compareTweetsByDate')) {
 	}
 }
 
+// Simple function to for use with array_map for sanitizing purposes.
+if (!function_exists('sanitize_array')) {
+	function sanitize_array($input) {
+		return htmlentities($input, ENT_QUOTES, UTF-8);
+	}
+}
 // HTML output 
 $output = '';
 
@@ -235,7 +241,8 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 							)
 						);
 					}
-
+					// For some added safety, lets sanitize the $placeholders variable first to ensure there isn't much room for potential exploit.
+					$placeholders = array_map('sanitize_array', $placeholders);
 					// Parse chunk passing values
 					$output .= $modx->getChunk($chunk, $placeholders); // Concatenate to output variable
 				}
