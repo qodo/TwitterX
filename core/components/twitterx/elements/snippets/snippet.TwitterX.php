@@ -40,7 +40,7 @@ $screen_name = isset($screen_name ) ? $screen_name : '' ;
 $include_rts = isset($include_rts) ? $include_rts : 1 ;
 $cache_id = isset($cache_id) ? $cache_id : 'TwitterX_' .  $modx->resource->id ;
 $toPlaceholder = isset($toPlaceholder) ? $toPlaceholder : '' ;
-$toPlaceholderPrefix = isset($toPlaceholderPrefix) ? $toPlaceholderPrefix . "." : '' ; // If you want to prefix the placeholders
+$toPlaceholderPrefix = isset($toPlaceholderPrefix) ? $toPlaceholderPrefix . "." : 'twitterx.' ; // If you want to prefix the placeholders
 $search = isset($search) ? $search : '' ;
 $slug = isset($slug) ? $slug : '' ; // Slug is only used when viewing a list
 
