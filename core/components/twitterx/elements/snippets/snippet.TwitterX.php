@@ -65,7 +65,7 @@ if (!function_exists('compareTweetsByDate')) {
 // Simple function to for use with array_map for sanitizing purposes.
 if (!function_exists('sanitize_array')) {
 	function sanitize_array($input) {
-		return htmlentities($input, ENT_QUOTES, UTF-8);
+		return htmlentities($input, ENT_QUOTES, 'UTF-8');
 	}
 }
 // HTML output 
