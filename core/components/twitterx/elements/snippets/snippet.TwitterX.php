@@ -18,11 +18,12 @@
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
  * @author Stewart Orr @ Qodo Ltd <stewart@qodo.co.uk>
- * @version 1.3.2
+ * @version 1.3.3
  * @copyright Copyright 2013 by Qodo Ltd
  * With thanks to @Sepiariver http://www.sepiariver.ca/
  * With thanks to @hvoort
  * With thanks to @OostDesign
+ * With thanks to Dameon87 https://github.com/Dameon87
  */
 
 // Twitter API keys and secrets
@@ -62,6 +63,13 @@ if (!function_exists('compareTweetsByDate')) {
 	}
 }
 
+// Simple function to for use with array_map for sanitizing purposes.
+if (!function_exists('sanitize_array')) {
+	function sanitize_array($input) {
+		return htmlentities($input, ENT_QUOTES, 'UTF-8');
+	}
+}
+
 // HTML output 
 $output = '';
 
@@ -96,9 +104,6 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 			// We want to use JSON format
 			$twitteroauth->format = 'json';
 			$twitteroauth->decode_json = FALSE;
-
-			// Oops! Force USE of 1.1 API
-			$twitteroauth->host = "https://api.twitter.com/1.1/";
 
 			// If we are doing a search, we use the search timeline
 			if ($search != '') {
@@ -211,7 +216,7 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 						$toPlaceholderPrefix . 'text' => $j->text,
 						$toPlaceholderPrefix . 'name' => isset($j->from_user_name) ? $j->from_user_name : $j->user->name,
 						$toPlaceholderPrefix . 'screen_name' => isset($j->from_user) ? $j->from_user : $j->user->screen_name,
-						$toPlaceholderPrefix . 'profile_image_url' => isset($j->profile_image_url) ? $j->profile_image_url : $j->user->profile_image_url,
+						$toPlaceholderPrefix . 'profile_image_url' => isset($j->profile_image_url_https) ? $j->profile_image_url_https : $j->user->profile_image_url_https,
 						$toPlaceholderPrefix . 'location' => $j->user->location,
 						$toPlaceholderPrefix . 'url' => $j->user->url,
 						$toPlaceholderPrefix . 'description' => $j->user->description,
@@ -228,13 +233,16 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 							$toPlaceholderPrefix . 'retweet_text' => $j->retweeted_status->text,
 							$toPlaceholderPrefix . 'retweet_name' => $j->retweeted_status->user->name,
 							$toPlaceholderPrefix . 'retweet_screen_name' => $j->retweeted_status->user->screen_name,
-							$toPlaceholderPrefix . 'retweet_profile_image_url' => $j->retweeted_status->user->profile_image_url,
+							$toPlaceholderPrefix . 'retweet_profile_image_url' => $j->retweeted_status->user->profile_image_url_https,
 							$toPlaceholderPrefix . 'retweet_location' => $j->retweeted_status->user->location,
 							$toPlaceholderPrefix . 'retweet_url' => $j->retweeted_status->user->url,
 							$toPlaceholderPrefix . 'retweet_description' => $j->retweeted_status->user->description,
 							)
 						);
 					}
+
+					// For some added safety, lets sanitize the $placeholders variable first to ensure there isn't much room for potential exploit.
+					$placeholders = array_map('sanitize_array', $placeholders);
 
 					// Parse chunk passing values
 					$output .= $modx->getChunk($chunk, $placeholders); // Concatenate to output variable

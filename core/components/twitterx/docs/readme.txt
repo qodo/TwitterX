@@ -1,4 +1,4 @@
-TwitterX v1.3.2
+TwitterX v1.3.3
 ===============
 
 This uses twitteroauth: https://github.com/abraham/twitteroauth
@@ -108,7 +108,7 @@ The package comes with a chunk for displaying the statuses called 'TwitterXTpl'.
 * text - status main text
 * name - Twitter name
 * screen_name - Twitter username
-* profile_image_url - Twitter avatar image url for this user
+* profile_image_url - Twitter avatar image url for this user (uses https as of version 1.3.3)
 * location - This users location
 * url - This users URL (if specified)
 * description - This users profile information
@@ -125,7 +125,7 @@ Retweets (where applicable)
 * retweet_text - status main text
 * retweet_name - Twitter name
 * retweet_screen_name - Twitter username
-* retweet_profile_image_url - Twitter avatar image url for this user
+* retweet_profile_image_url - Twitter avatar image url for this user (uses https as of version 1.3.3)
 * retweet_location - This users location
 * retweet_url - This users URL (if specified)
 * retweet_description - This users profile information
@@ -140,4 +140,4 @@ For information and support, check out my blog:
 http://www.qodo.co.uk/blog/twitterx-a-new-modx-extra-for-pulling-in-twitter-feeds-using-api-1.1/
 
 Created by Stewart Orr @ Qodo Ltd (http://www.qodo.co.uk).
-Contributers: @sepiariver (http://www.sepiariver.ca), @OostDesign (http://www.oostdesign.com/), @scottborys (http://scottborys.com/)
+Contributers: @sepiariver (http://www.sepiariver.ca), @OostDesign (http://www.oostdesign.com/), @scottborys (http://scottborys.com/), Dameon87 (https://github.com/
