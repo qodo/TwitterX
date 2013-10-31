@@ -40,7 +40,7 @@ $screen_name = isset($screen_name ) ? $screen_name : '' ;
 $include_rts = isset($include_rts) ? $include_rts : 1 ;
 $cache_id = isset($cache_id) ? $cache_id : 'TwitterX_' .  $modx->resource->id ;
 $toPlaceholder = isset($toPlaceholder) ? $toPlaceholder : '' ;
-$toPlaceholderPrefix = isset($toPlaceholderPrefix) ? $toPlaceholderPrefix . "." : '' ; // If you want to prefix the placeholders
+$toPlaceholderPrefix = isset($toPlaceholderPrefix) ? $toPlaceholderPrefix . "." : 'twitterx.' ; // If you want to prefix the placeholders
 $search = isset($search) ? $search : '' ;
 $slug = isset($slug) ? $slug : '' ; // Slug is only used when viewing a list
 
@@ -62,6 +62,12 @@ if (!function_exists('compareTweetsByDate')) {
 	}
 }
 
+// Simple function to for use with array_map for sanitizing purposes.
+if (!function_exists('sanitize_array')) {
+	function sanitize_array($input) {
+		return htmlentities($input, ENT_QUOTES, 'UTF-8');
+	}
+}
 // HTML output 
 $output = '';
 
@@ -211,7 +217,7 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 						$toPlaceholderPrefix . 'text' => $j->text,
 						$toPlaceholderPrefix . 'name' => isset($j->from_user_name) ? $j->from_user_name : $j->user->name,
 						$toPlaceholderPrefix . 'screen_name' => isset($j->from_user) ? $j->from_user : $j->user->screen_name,
-						$toPlaceholderPrefix . 'profile_image_url' => isset($j->profile_image_url) ? $j->profile_image_url : $j->user->profile_image_url,
+						$toPlaceholderPrefix . 'profile_image_url' => isset($j->profile_image_url_https) ? $j->profile_image_url_https : $j->user->profile_image_url_https,
 						$toPlaceholderPrefix . 'location' => $j->user->location,
 						$toPlaceholderPrefix . 'url' => $j->user->url,
 						$toPlaceholderPrefix . 'description' => $j->user->description,
@@ -228,14 +234,15 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 							$toPlaceholderPrefix . 'retweet_text' => $j->retweeted_status->text,
 							$toPlaceholderPrefix . 'retweet_name' => $j->retweeted_status->user->name,
 							$toPlaceholderPrefix . 'retweet_screen_name' => $j->retweeted_status->user->screen_name,
-							$toPlaceholderPrefix . 'retweet_profile_image_url' => $j->retweeted_status->user->profile_image_url,
+							$toPlaceholderPrefix . 'retweet_profile_image_url' => $j->retweeted_status->user->profile_image_url_https,
 							$toPlaceholderPrefix . 'retweet_location' => $j->retweeted_status->user->location,
 							$toPlaceholderPrefix . 'retweet_url' => $j->retweeted_status->user->url,
 							$toPlaceholderPrefix . 'retweet_description' => $j->retweeted_status->user->description,
 							)
 						);
 					}
-
+					// For some added safety, lets sanitize the $placeholders variable first to ensure there isn't much room for potential exploit.
+					$placeholders = array_map('sanitize_array', $placeholders);
 					// Parse chunk passing values
 					$output .= $modx->getChunk($chunk, $placeholders); // Concatenate to output variable
 				}
