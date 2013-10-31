@@ -4,7 +4,7 @@ TwitterX 1.3.3 - 31/10/2013
 ===================================== 
 - Updated to latest version of twitteroauth
 - Added changes from Dameon87 to change twitter profile images to https, sanitise content and improve TwitterXFormat - thanks!
-- Uploaded correct changelog, licencse and readme (previous version was for a different extra)
+- Uploaded correct changelog, licence and readme (previous version was for a different extra)
 
 TwitterX 1.3.2 - 04/09/2013
 ===================================== 
