@@ -20,6 +20,6 @@
  */
 
 $output = preg_replace('/(https?:\/\/[^\s"<>]+)/','<a href="$1">$1</a>', $input);
-$output = preg_replace('/(^|[\n\s])#([^\s"\t\n\r<:]*)/is', '$1<a href="https://twitter.com/search?q=%23$2">#$2</a>', $output);
-$output = preg_replace('/(^|[\n\s])@([^\s"\t\n\r<:]*)/is', '$1<a href="https://twitter.com/$2">@$2</a>', $output);
+$output = preg_replace('/(^|[\n\s])#([^\s"\t\n\r<:]*)/is', '$1<a href="https://twitter.com/search?q=%23$2" target="_blank">#$2</a>', $output);
+$output = preg_replace('/(^|[\n\s])@([^\s"\t\n\r<:]*)/is', '$1<a href="https://twitter.com/$2" target="_blank">@$2</a>', $output);
 return $output;
