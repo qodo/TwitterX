@@ -1,72 +1,85 @@
-Changelog for TwitterX package. 
+Changelog for TwitterX package.
+
+TwitterX 1.3.6 - 27/08/2014
+=====================================
+- Bug fix for retweet URLs being truncated.
+
+TwitterX 1.3.5 - 05/07/2014
+=====================================
+- Small bug fix and updates for MODX 2.3
+
+TwitterX 1.3.4 - 12/01/2014
+=====================================
+- Fixed bug when specifiying a limit of tweets along with include_rts
+- New option to exclude replies using exclude_replies option
 
 TwitterX 1.3.3 - 31/10/2013
-===================================== 
+=====================================
 - Updated to latest version of twitteroauth
 - Added changes from Dameon87 to change twitter profile images to https, sanitise content and improve TwitterXFormat - thanks!
 - Uploaded correct changelog, licence and readme (previous version was for a different extra)
 
 TwitterX 1.3.2 - 04/09/2013
-===================================== 
+=====================================
 - Added isset() to some elements to stop warnings/errors
 
 TwitterX 1.3.1 - 23/08/2013
-===================================== 
+=====================================
 - Fixed option for favourites (thanks @sepiariver)
 - Added option to prefix TwitterX placeholders
 
 TwitterX 1.3 - 24/07/2013
-===================================== 
+=====================================
 - Added option to view user lists
 
 TwitterX 1.2 - 12/06/2013
-===================================== 
+=====================================
 - Fixed twitter search problem - thanks OostDesign
 
 TwitterX 1.1 - 12/06/2013
-===================================== 
+=====================================
 - Fixed problem where it was ACTUALLY using 1.0 API instead of 1.1
 - Changed cached_id to not automatically append _PAGEID
 - Removed $limit+1 - it was always showing 1 more than specified
 
 TwitterX 1.0 - 23/04/2013
-===================================== 
+=====================================
 - Added multiple screen_name option separated by comma, thanks @hvoort
 - Added option to do basic Twitter searches
 - Bug fixes
 
 TwitterX 0.8 - 21/01/2013
-===================================== 
+=====================================
 - Added option include_rts to choose whether to include retweets.
 - Added options cache_id and toPlaceholder thanks to @sepiariver to allow for placeholder output and unique caching.
 - Fix for viewing Twitter favourites instead of regular statuses (thanks @sepiariver).
 - Added a few more comments.
 
 TwitterX 0.7 - 01/12/2012
-===================================== 
+=====================================
 - Fixed spelling mistake in error message
 - Added test for CURL as it's needed by twitter auth
 - Corrected parameter 'twitter_consumer_token_secret' which should have been 'twitter_access_token_secret' with support for the old
 
 TwitterX 0.6 - 01/12/2012
-===================================== 
+=====================================
 - Added option to view other users statuses using &screen_name=`Qodo`
 
 TwitterX 0.5 - 29/11/2012
-===================================== 
+=====================================
 - Changed the way we limit the number of tweets - using twitter 'count' parameter instead of a limited loop.
 
 TwitterX 0.4 - 15/11/2012
-===================================== 
+=====================================
 - Bug fix for reporting errors (thanks Jeremy)
 
 TwitterX 0.3
-===================================== 
+=====================================
 - Added in caching of twitter data to protect against over using twitter limit
 - Added id_str available to chunk (thanks Laurent Mignot)
 - Updated to check for the twitteroauth class first
 - Corrected error in documentation (feed parameter should have been timeline)
 
 TwitterX 0.2
-===================================== 
+=====================================
 - First version

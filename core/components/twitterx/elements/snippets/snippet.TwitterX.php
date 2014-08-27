@@ -18,8 +18,8 @@
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
  * @author Stewart Orr @ Qodo Ltd <stewart@qodo.co.uk>
- * @version 1.3.3
- * @copyright Copyright 2013 by Qodo Ltd
+ * @version 1.3.6
+ * @copyright Copyright Qodo Ltd 2014
  * With thanks to @Sepiariver http://www.sepiariver.ca/
  * With thanks to @hvoort
  * With thanks to @OostDesign
@@ -39,6 +39,7 @@ $timeline = isset($timeline) ? $timeline : 'user_timeline' ;
 $cache = isset($cache) ? $cache : 7200 ;
 $screen_name = isset($screen_name ) ? $screen_name : '' ;
 $include_rts = isset($include_rts) ? $include_rts : 1 ;
+$exclude_replies  = isset($exclude_replies) ? $exclude_replies : 0 ;
 $cache_id = isset($cache_id) ? $cache_id : 'TwitterX_' .  $modx->resource->id ;
 $toPlaceholder = isset($toPlaceholder) ? $toPlaceholder : '' ;
 $toPlaceholderPrefix = isset($toPlaceholderPrefix) ? $toPlaceholderPrefix . "." : '' ; // If you want to prefix the placeholders
@@ -66,11 +67,11 @@ if (!function_exists('compareTweetsByDate')) {
 // Simple function to for use with array_map for sanitizing purposes.
 if (!function_exists('sanitize_array')) {
 	function sanitize_array($input) {
-		return htmlentities($input, ENT_QUOTES, 'UTF-8');
+		return htmlentities($input, ENT_QUOTES, 'UTF-8', false);
 	}
 }
 
-// HTML output 
+// HTML output
 $output = '';
 
 //**************************************************************************
@@ -84,15 +85,15 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 
 	// Test for required function(s)
 	if (!function_exists('curl_init')) {
-		
-			echo "<strong>TwitterX Error:</strong> cURL functions do not exist, cannot continue.";	
-			
+
+			echo "<strong>TwitterX Error:</strong> cURL functions do not exist, cannot continue.";
+
 	} else {
 
 		// Try loading the data from MODX cache first
 		$json = $modx->cacheManager->get($cache_id); // Added ability to set custom cache IDs
-		
-		if (!$json) { 
+
+		if (!$json) {
 
 			// Load the TwitterOAuth lib required if not exists
 			if (!class_exists('TwitterOAuth')) {
@@ -110,11 +111,11 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 
 				$timeline = 'search/tweets';
 				$options = array(
+					'count' => 150, // This is large number because of the way twitter excludes retweets and replies
 					'q' => $search,
-					'count' => $limit,
 				);
 				$json = $twitteroauth->get($timeline, $options);
-		                
+
                 // Because search returns info on the search, we need to decode, get the results and then encode again
     			// This is so we can cache this too. Messy but it works!
 				$json = json_decode($json);
@@ -123,10 +124,11 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 
 			} else {
 
-				// Request statuses with optinal parameters
+				// Request statuses with optional parameters
 				$options = array(
-					'count' => $limit,
-					'include_rts' => $include_rts
+					'count' => 150, // This is large number because of the way twitter excludes retweets and replies
+					'include_rts' => $include_rts,
+					'exclude_replies' => $exclude_replies,
 				);
 
 				// If we are viewing favourites or regular statuses
@@ -174,7 +176,7 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 						$options['slug'] = $slug;
 					} elseif ($screen_name != '') {
 						// If we have a single screen_name, pass this to Twitter API
-						$options['screen_name'] = $screen_name;	
+						$options['screen_name'] = $screen_name;
 					}
 					$json = $twitteroauth->get($timeline, $options);
 				}
@@ -195,7 +197,7 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 		if (isset($json->errors)) {
 
 			foreach($json->errors as $err) {
-				$output .= "<strong>TwitterX Error:</strong> Could not load tweets as Twitter responded with the error: '" . $err->message . "'.";				
+				$output .= "<strong>TwitterX Error:</strong> Could not load tweets as Twitter responded with the error: '" . $err->message . "'.";
 			}
 
 		} else {
@@ -203,8 +205,14 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 			// Any tweets present?
 			if (is_array($json) && count($json) > 0) {
 
+				// Counter for number of tweets
+				$tweetCount = 0;
+
 				// For each result, build output values
 				foreach ($json as $j) {
+
+					// If we already have enough tweets, break
+					if ($tweetCount >= $limit) break;
 
 					// Get placerholder values
 					// This has been updated to use search values if present
@@ -225,6 +233,8 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 					// If this is a retweet, create placeholders for this too
 					if (isset($j->retweeted_status)) {
 						$placeholders = array_merge($placeholders, array(
+						    // Here we change the text to prevent truncation
+						    $toPlaceholderPrefix . 'text' => 'RT @' . $j->retweeted_status->user->name . ': ' . $j->retweeted_status->text,
 							$toPlaceholderPrefix . 'retweet_count' => $j->retweeted_status->retweet_count,
 							$toPlaceholderPrefix . 'retweet_created_at' => $j->retweeted_status->created_at,
 							$toPlaceholderPrefix . 'retweet_source' => $j->retweeted_status->source,
@@ -246,6 +256,9 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 
 					// Parse chunk passing values
 					$output .= $modx->getChunk($chunk, $placeholders); // Concatenate to output variable
+
+					// Update number of tweets
+					$tweetCount++;
 				}
 			}
 		}

@@ -1,9 +1,9 @@
-TwitterX v1.3.3
+TwitterX v1.3.6
 ===============
 
 This uses twitteroauth: https://github.com/abraham/twitteroauth
 
-This package loads Twitter feeds using the new (and very annoying) Twitter 1.1 API. You will need to create a Twitter app here: 
+This package loads Twitter feeds using the new (and very annoying) Twitter 1.1 API. You will need to create a Twitter app here:
 
 https://dev.twitter.com/apps/new
 
@@ -16,10 +16,10 @@ Snippet TwitterX
 
 This should be called uncached if you are using :ago in the chunk otherwise it can be cached.
 
- [[!TwitterX? 
+ [[!TwitterX?
     &twitter_consumer_key=`aaaa`
-    &twitter_consumer_secret=`bbbb` 
-    &twitter_access_token=`cccc` 
+    &twitter_consumer_secret=`bbbb`
+    &twitter_access_token=`cccc`
     &twitter_access_token_secret=`dddd`
     &limit=`4`
     &timeline=`user_timeline`
@@ -39,6 +39,7 @@ This should be called uncached if you are using :ago in the chunk otherwise it c
 * cache - how many seconds to cache the twitter data feed (default: 7200)
 * screen_name - which user you want to load
 * include_rts - should this include retweets (default: 1)
+* exclude_replies - should this exclude replies retweets (default: 0)
 * cache_id - unique ID for caching in case you want to view multiple feeds or different feeds (default: TwitterX_PAGEID)
 * toPlaceholder - a placeholder ID if you want to use content as a placeholder instead of outputting directly (default: '')
 * toPlaceholderPrefix - if you want to prefix the placeholder values. E.g. 'twitterx' would create placeholders like [[*twitterx.text]] (default: '')

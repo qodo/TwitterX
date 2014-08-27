@@ -1,9 +1,9 @@
-TwitterX v1.3.3
+TwitterX v1.3.5
 ===============
 
 This uses twitteroauth: https://github.com/abraham/twitteroauth
 
-This package loads Twitter feeds using the new (and very annoying) Twitter 1.1 API. You will need to create a Twitter app here: 
+This package loads Twitter feeds using the new (and very annoying) Twitter 1.1 API. You will need to create a Twitter app here:
 
 https://dev.twitter.com/apps/new
 
@@ -16,10 +16,10 @@ Snippet TwitterX
 
 This should be called uncached if you are using :ago in the chunk otherwise it can be cached.
 
-[[!TwitterX? 
+[[!TwitterX?
     &twitter_consumer_key=`aaaa`
-    &twitter_consumer_secret=`bbbb` 
-    &twitter_access_token=`cccc` 
+    &twitter_consumer_secret=`bbbb`
+    &twitter_access_token=`cccc`
     &twitter_access_token_secret=`dddd`
     &limit=`4`
     &timeline=`user_timeline`
