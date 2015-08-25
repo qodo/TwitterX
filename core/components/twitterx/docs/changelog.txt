@@ -1,5 +1,9 @@
 Changelog for TwitterX package.
 
+TwitterX 1.3.7 - 04/08/2015
+=====================================
+- Bug fix for retweet links not using screen_name (thanks @pmacswebteam)
+
 TwitterX 1.3.6 - 27/08/2014
 =====================================
 - Bug fix for retweet URLs being truncated.
