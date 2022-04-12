@@ -1,10 +1,14 @@
 <?php
+
+require_once $modx->getOption('core_path').'components/twitterx/vendor/autoload.php';
+use Abraham\TwitterOAuth\TwitterOAuth;
+
 /**
  * TwitterX
  *
- * This package loads Twitter feeds using the new (and very annoying) Twitter
- * 1.1 API. You will need to create a Twitter app and get the keys and tokens
- * by creating a new app here: https://dev.twitter.com/apps/new
+ * This package loads Twitter feeds using the Twitter 1.1 API. You will need to 
+ * create a Twitter app and get the keys and tokens by creating a new app here:
+ * https://dev.twitter.com/apps/new
  *
  * This uses twitteroauth: https://github.com/abraham/twitteroauth
  *
@@ -18,8 +22,8 @@
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
  * @author Stewart Orr @ Qodo Ltd <stewart@qodo.co.uk>
- * @version 1.3.7
- * @copyright Copyright Qodo Ltd 2014
+ * @version 1.4.0
+ * @copyright Copyright 2022 by Qodo Ltd https://www.qodo.co.uk
  * With thanks to @Sepiariver http://www.sepiariver.ca/
  * With thanks to @hvoort
  * With thanks to @OostDesign
@@ -27,10 +31,10 @@
  */
 
 // Twitter API keys and secrets
-$twitter_consumer_key          = isset($twitter_consumer_key) ? $twitter_consumer_key : FALSE ;
-$twitter_consumer_secret       = isset($twitter_consumer_secret) ? $twitter_consumer_secret : FALSE ;
-$twitter_access_token          = isset($twitter_access_token) ? $twitter_access_token : FALSE ;
-$twitter_access_token_secret   = isset($twitter_access_token_secret) ? $twitter_access_token_secret : FALSE ;
+$twitter_consumer_key          = isset($twitter_consumer_key) ? $twitter_consumer_key : false ;
+$twitter_consumer_secret       = isset($twitter_consumer_secret) ? $twitter_consumer_secret : false ;
+$twitter_access_token          = isset($twitter_access_token) ? $twitter_access_token : false ;
+$twitter_access_token_secret   = isset($twitter_access_token_secret) ? $twitter_access_token_secret : false ;
 
 // Other options
 $limit = isset($limit) ? $limit : 5 ;
@@ -48,7 +52,7 @@ $slug = isset($slug) ? $slug : '' ; // Slug is only used when viewing a list
 
 // Here we support an old error where the parameter was incorrect.
 if (isset($twitter_consumer_token_secret)) {
-    $twitter_access_token_secret = isset($twitter_consumer_token_secret) ? $twitter_consumer_token_secret : FALSE ;
+    $twitter_access_token_secret = isset($twitter_consumer_token_secret) ? $twitter_consumer_token_secret : false ;
 }
 
 // Function to compare tweets based on their creation time
@@ -58,7 +62,7 @@ if (!function_exists('compareTweetsByDate')) {
         $time_b = strtotime($b->created_at);
 
         if ($time_a == $time_b) {
-          return 0;
+            return 0;
         }
         return ($time_a > $time_b) ? -1 : 1;
     }
@@ -71,7 +75,7 @@ if (!function_exists('sanitize_array')) {
     }
 }
 
-// HTML output
+// HTML output 
 $output = '';
 
 //**************************************************************************
@@ -85,26 +89,21 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 
     // Test for required function(s)
     if (!function_exists('curl_init')) {
-
-            echo "<strong>TwitterX Error:</strong> cURL functions do not exist, cannot continue.";
-
+        
+            echo "<strong>TwitterX Error:</strong> cURL functions do not exist, cannot continue.";  
+            
     } else {
 
         // Try loading the data from MODX cache first
-        $json = $modx->cacheManager->get($cache_id); // Added ability to set custom cache IDs
-
-        if (!$json) {
-
-            // Load the TwitterOAuth lib required if not exists
-            if (!class_exists('TwitterOAuth')) {
-                require_once $modx->getOption('core_path').'components/twitterx/twitteroauth/twitteroauth/twitteroauth.php';
-            }
+        $data = json_decode($modx->cacheManager->get($cache_id)); // Added ability to set custom cache IDs
+        
+        if (!$data) { 
+            
             // Create new twitteroauth
             $twitteroauth = new TwitterOAuth($twitter_consumer_key, $twitter_consumer_secret, $twitter_access_token, $twitter_access_token_secret);
 
             // We want to use JSON format
             $twitteroauth->format = 'json';
-            $twitteroauth->decode_json = FALSE;
 
             // If we are doing a search, we use the search timeline
             if ($search != '') {
@@ -114,13 +113,11 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
                     'count' => 150, // This is large number because of the way twitter excludes retweets and replies
                     'q' => $search,
                 );
-                $json = $twitteroauth->get($timeline, $options);
-
+                $data = $twitteroauth->get($timeline, $options);
+                        
                 // Because search returns info on the search, we need to decode, get the results and then encode again
                 // This is so we can cache this too. Messy but it works!
-                $json = json_decode($json);
-                $json = $json->statuses;
-                $json = json_encode($json);
+                $statuses = $data->statuses;
 
             } else {
 
@@ -139,9 +136,8 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
                 // Favourites - thanks to @sepiariver
                 if ($timeline === 'favorites') { $timeline = $timeline . '/list'; }
 
-
                 // If we have one or multiple screen names
-                if (strpos($screen_name, ',') !== FALSE) {
+                if (strpos($screen_name, ',') !== false) {
 
                     $tweets = array();
 
@@ -152,14 +148,15 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
                         // Get timeline for every screen name
                         foreach ($screen_name_array as $sn) {
                             $options['screen_name'] = $sn;
-                            $json_part = $twitteroauth->get($timeline, $options);
+                            $data_part = $twitteroauth->get($timeline, $options);
 
                             // No error while loading timeline
-                            if (!isset($json_part->error)) {
-                                $tweets = array_merge($tweets, json_decode($json_part));
+                            if (!isset($data_part->error)) {
+                                $tweets = array_merge($tweets, json_decode($data_part));
                             }
                         }
                     }
+                    
                     // Sort mixed tweets of different users
                     usort($tweets, 'compareTweetsByDate');
 
@@ -167,50 +164,50 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
                     $tweets = array_slice($tweets, 0, $limit);
 
                     // Convert array to json for saving to cache
-                    $json = json_encode($tweets);
+                    $data = json_encode($tweets);
 
                 } else {
+
                     // Here we are looking to see if we want a list instead of timeline
                     if ($slug != '') {
                         $options['owner_screen_name'] = $screen_name;
                         $options['slug'] = $slug;
                     } elseif ($screen_name != '') {
                         // If we have a single screen_name, pass this to Twitter API
-                        $options['screen_name'] = $screen_name;
+                        $options['screen_name'] = $screen_name; 
                     }
-                    $json = $twitteroauth->get($timeline, $options);
+
+                    $data = $twitteroauth->get($timeline, $options);
+
                 }
 
             }
 
             // No errors? Save to MODX Cache
-            if (!isset($json->error)) {
-                $modx->cacheManager->set($cache_id, $json, $cache);
+            if (!isset($data->error)) {
+                $modx->cacheManager->set($cache_id, json_encode($data), $cache);
             }
 
         }
 
-        // Decode this now that we have used it above in the cache
-        $json = json_decode($json);
-
         // If there any errors from Twitter, output them...
-        if (isset($json->errors)) {
+        if (isset($data->errors)) {
 
-            foreach($json->errors as $err) {
+            foreach($data->errors as $err) {
                 $output .= "<strong>TwitterX Error:</strong> Could not load tweets as Twitter responded with the error: '" . $err->message . "'.";
             }
 
         } else {
 
             // Any tweets present?
-            if (is_array($json) && count($json) > 0) {
+            if (is_array($data) && count($data) > 0) {
 
                 // Counter for number of tweets
                 $tweetCount = 0;
-
+                
                 // For each result, build output values
-                foreach ($json as $j) {
-
+                foreach ($data as $j) {
+                    
                     // If we already have enough tweets, break
                     if ($tweetCount >= $limit) break;
 
@@ -256,7 +253,7 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
 
                     // Parse chunk passing values
                     $output .= $modx->getChunk($chunk, $placeholders); // Concatenate to output variable
-
+                    
                     // Update number of tweets
                     $tweetCount++;
                 }
@@ -269,5 +266,6 @@ if (!$twitter_consumer_key || !$twitter_consumer_secret || !$twitter_access_toke
         } else {
             return $output;
         }
+        
     }
 }

@@ -1,0 +1,12 @@
+{
+    "name": "qodo/twitterx",
+    "authors": [
+        {
+            "name": "Stewart Orr",
+            "email": "stewart@qodo.co.uk"
+        }
+    ],
+    "require": {
+        "abraham/twitteroauth": "3.1.0"
+    }
+}
