@@ -1,6 +1,12 @@
 TwitterX v1.4.0
 ===============
 
+## Discontinued Notice
+
+Unfortunately, this extra is now discontinued and no longer supported. Twitter have now closed their API for anything useful unless you pay a subscription so the API that this relied on, is no longer working. Thank you all for using it!
+
+## TwitterX
+
 This uses twitteroauth v3.1.0: https://github.com/abraham/twitteroauth for support for PHP 7.3 and 8.0+.
 
 As twitteroauth only supports PHP versions that are actively supported, the next version of TwitterX will drop support for 7.3 and add support for 8.1. For more information, you can review the releases list at: https://github.com/abraham/twitteroauth/releases
@@ -123,7 +129,7 @@ Further info
 
 For information and support, check out my blog:
 
-https://www.qodo.co.uk/twitterx/
+https://www.stewartorr.co.uk/twitterx/
 
-Created by Stewart Orr @ Qodo Ltd (https://www.qodo.co.uk).
+Created by Stewart Orr (https://www.stewartorr.co.uk).
 Contributers: @sepiariver (http://www.sepiariver.ca), @OostDesign (http://www.oostdesign.com/), @scottborys (http://scottborys.com/), Dameon87 (https://github.com/Dameon87)
